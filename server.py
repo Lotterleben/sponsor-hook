@@ -6,8 +6,8 @@ import requests
 from bottle import route, run, template, request
 
 # Authentication for the user who is adding the sponsor.
-USERNAME = ''     # read from config.json
-API_KEY = ''      # read from config.json
+USERNAME = ''      # read from config.json
+API_KEY = ''       # read from config.json
 SECRET_TOKEN = b'' # read from config.json
 
 TARGET_EVENT = 'issue_comment' # TODO change to 'sponsorship'
@@ -88,7 +88,6 @@ if __name__ == '__main__':
         USERNAME = config_json['username']
         API_KEY = config_json['api_key']
         SECRET_TOKEN = bytearray(config_json['secret_token'], 'utf-8')
-    # TODO add nice error msg if config is missing
 
     # start server
     run(host='localhost', port=4567)

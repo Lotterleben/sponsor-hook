@@ -1,15 +1,23 @@
 #!/usr/bin/env python3
+import hashlib
+import hmac
 import json
 import requests
 from bottle import route, run, template, request
 
 # Authentication for the user who is adding the sponsor.
-USERNAME = '' # read from config.json
-API_KEY = ''  # read from config.json
+USERNAME = ''     # read from config.json
+API_KEY = ''      # read from config.json
+SECRET_TOKEN = b'' # read from config.json
+
+TARGET_EVENT = 'issue_comment' # TODO change to 'sponsorship'
 
 # NOTE:
 # - Webhook contenttype must be set to `application/json`
 # - `config.json` must contain github credentials (see `config.json.sample`)
+# - generate and set `secret_token` in config as described in
+#   https://docs.github.com/en/free-pro-team@latest/developers/webhooks-and-events/securing-your-webhooks
+# - TODO add requirements.txt for dependency installation
 
 ORG_API_URL = 'https://api.github.com/orgs/congenial-guacamole-org/'
 
@@ -33,38 +41,53 @@ def add_sponsor(invitee_id: int):
         print('Response:', result.content)
 
 
+def verify_signature(payload_body: bytes, x_hub_signature: str) -> bool:
+    h = hmac.new(SECRET_TOKEN, payload_body, hashlib.sha1)
+    signature = 'sha1=' + h.hexdigest()
+
+    print("received signature:", x_hub_signature)
+    print("computed signature:", signature)
+
+    return hmac.compare_digest(signature, x_hub_signature)
+
+
 @route('/payload', method=['GET', 'POST'])
 def index():
     print("got request: ")
     print(request)
 
-    if request.method == 'POST':
-        # TODO https://docs.github.com/en/free-pro-team@latest/developers/webhooks-and-events/securing-your-webhooks
-        # TODO Check if the POST request is from github.com
+    # check signature before everything else
+    x_hub_signature = request.headers.get('X-Hub-Signature')
+    signature_valid = verify_signature(request.body.getvalue(), x_hub_signature)
+    if signature_valid == False:
+        print('signature mismatch, ignoring request')
+        return '401 Unauthorized'
 
+    # TODO Also check if the sender IP belongs to github.com?
+
+    if request.method == 'POST' and request.headers.get('X-GitHub-Event') == TARGET_EVENT:
         payload = request.json
 
+        # only take action when a new sponsorship is *created*
         if payload['action'] == 'created':
-            # only take action when a new sponsorship is created
+            try:
+                # TODO pull info from payload['sponsorship']['sponsor']['id'] instead
+                sender_gh_user_id = payload['sender']['id']
+                print("our new sponsor is: ", sender_gh_user_id)
 
-            # TODO pull info from payload['sponsorship']['sponsor']['id'] instead
-            sender_gh_user_id = payload['sender']['id']
-            print("our new sponsor is: ", sender_gh_user_id)
+                add_sponsor(sender_gh_user_id)
 
-            add_sponsor(sender_gh_user_id)
+                return '200 OK'
+            except:
+                print("missing sponsor data (unexpected request type?)")
 
-            return 'OK'
-
-    # DELETEME only for debugging
-    elif request.method == 'GET':
-        sender_gh_user_id = 581552 # my own id to prevent spamming anoyne
-        add_sponsor(sender_gh_user_id)
 
 if __name__ == '__main__':
     with open('config.json', 'r') as config:
         config_json = json.loads(config.read())
         USERNAME = config_json['username']
         API_KEY = config_json['api_key']
+        SECRET_TOKEN = bytearray(config_json['secret_token'], 'utf-8')
     # TODO add nice error msg if config is missing
 
     # start server

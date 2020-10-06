@@ -3,7 +3,7 @@ import hashlib
 import hmac
 import json
 import requests
-from bottle import route, run, template, request
+from bottle import Bottle, route, run, template, request
 
 # Authentication for the user who is adding the sponsor.
 USERNAME = ''      # read from config.json
@@ -20,6 +20,8 @@ TARGET_EVENT = 'issue_comment' # TODO change to 'sponsorship'
 # - TODO add requirements.txt for dependency installation
 
 ORG_API_URL = 'https://api.github.com/orgs/congenial-guacamole-org/'
+
+app = Bottle()
 
 # TODO. also mention username for log readig convenience
 def add_sponsor(invitee_id: int):
@@ -51,13 +53,16 @@ def verify_signature(payload_body: bytes, x_hub_signature: str) -> bool:
     return hmac.compare_digest(signature, x_hub_signature)
 
 
-@route('/payload', method=['GET', 'POST'])
+@app.route('/payload', method=['GET', 'POST'])
 def index():
     print("got request: ")
     print(request)
 
     # check signature before everything else
     x_hub_signature = request.headers.get('X-Hub-Signature')
+    if x_hub_signature == None:
+        print('missing signature, ignoring request')
+        return '401 Unauthorized'
     signature_valid = verify_signature(request.body.getvalue(), x_hub_signature)
     if signature_valid == False:
         print('signature mismatch, ignoring request')
@@ -90,5 +95,5 @@ if __name__ == '__main__':
         SECRET_TOKEN = bytearray(config_json['secret_token'], 'utf-8')
 
     # start server
-    run(host='localhost', port=4567)
+    run(app, host='localhost', port=4567)
 

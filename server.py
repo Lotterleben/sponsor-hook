@@ -2,6 +2,7 @@
 import hashlib
 import hmac
 import json
+import os
 import requests
 import sys
 from bottle import Bottle, route, run, template, request
@@ -9,9 +10,9 @@ from bottle import Bottle, route, run, template, request
 # TODO add "hi we're live, point your webhooks to '/payload'" at / for nicer deploying
 
 # Authentication for the user who is adding the sponsor.
-USERNAME = ''      # read from config.json
-API_KEY = ''       # read from config.json
-SECRET_TOKEN = b'' # read from config.json
+USERNAME = ''      # read from environment variables
+API_KEY = ''       # read from environment variables
+SECRET_TOKEN = b'' # read from environment variables
 
 TARGET_EVENT = 'issue_comment' # TODO change to 'sponsorship'
 
@@ -87,14 +88,16 @@ def index():
 
 
 if __name__ == '__main__':
+
     try:
-        config = open('config.json', 'r')
-        config_json = json.loads(config.read())
-        USERNAME = config_json['username']
-        API_KEY = config_json['api_key']
-        SECRET_TOKEN = bytearray(config_json['secret_token'], 'utf-8')
-    except FileNotFoundError:
-        sys.exit('config.json is missing! See the config.json.example file in this directory for a template.')
+        USERNAME = os.environ['USERNAME']
+        API_KEY = bytes(os.environ['API_KEY'], "utf-8")
+        SECRET_TOKEN = bytes(os.environ['SECRET_TOKEN'], "utf-8")
+    except KeyError as key:
+        # todo add hint that you can set this in
+        # https://eu-central-1.console.aws.amazon.com/lambda/home?region=eu-central-1#/functions/sponsor-hook-dev?tab=configuration
+        # or locally if you're just testing there
+        sys.exit("ERROR: environment variable " + str(key) + " not set. Shutting down")
 
     # start server
     run(app, host='localhost', port=4567)

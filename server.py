@@ -6,19 +6,14 @@ import requests
 import sys
 from bottle import Bottle, route, run, template, request
 
+# TODO add "hi we're live, point your webhooks to '/payload'" at / for nicer deploying
+
 # Authentication for the user who is adding the sponsor.
 USERNAME = ''      # read from config.json
 API_KEY = ''       # read from config.json
 SECRET_TOKEN = b'' # read from config.json
 
 TARGET_EVENT = 'issue_comment' # TODO change to 'sponsorship'
-
-# NOTE:
-# - Webhook contenttype must be set to `application/json`
-# - `config.json` must contain github credentials (see `config.json.sample`)
-# - generate and set `secret_token` in config as described in
-#   https://docs.github.com/en/free-pro-team@latest/developers/webhooks-and-events/securing-your-webhooks
-# - TODO add requirements.txt for dependency installation
 
 ORG_API_URL = 'https://api.github.com/orgs/congenial-guacamole-org/'
 

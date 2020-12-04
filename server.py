@@ -9,19 +9,28 @@ from bottle import Bottle, route, run, template, request
 
 # TODO add "hi we're live, point your webhooks to '/payload'" at / for nicer deploying
 
-# Authentication for the user who is adding the sponsor.
-USERNAME = ''      # read from environment variables
-API_KEY = ''       # read from environment variables
-SECRET_TOKEN = b'' # read from environment variables
-
 TARGET_EVENT = 'issue_comment' # TODO change to 'sponsorship'
 
 ORG_API_URL = 'https://api.github.com/orgs/congenial-guacamole-org/'
 
 app = Bottle()
 
+# TODO make this return the vars instead of having global ones
+def get_env_config():
+    try:
+        USERNAME = os.environ['USERNAME']
+        API_KEY = bytes(os.environ['API_KEY'], "utf-8")
+        SECRET_TOKEN = bytes(os.environ['SECRET_TOKEN'], "utf-8")
+
+        return USERNAME, API_KEY, SECRET_TOKEN
+    except KeyError as key:
+        # todo add hint that you can set this in
+        # https://eu-central-1.console.aws.amazon.com/lambda/home?region=eu-central-1#/functions/sponsor-hook-dev?tab=configuration
+        # or locally if you're just testing there
+        sys.exit("ERROR: environment variable " + str(key) + " not set. Shutting down")
+
 # TODO. also mention username for log readig convenience
-def add_sponsor(invitee_id: int):
+def add_sponsor(invitee_id: int, USERNAME: str, API_KEY: bytes):
     print('adding sponsor with id', id)
 
     invitations_endpoint = ORG_API_URL + 'invitations'
@@ -40,8 +49,8 @@ def add_sponsor(invitee_id: int):
         print('Response:', result.content)
 
 
-def verify_signature(payload_body: bytes, x_hub_signature: str) -> bool:
-    # make sure we've successfully retrieved and never lost our config
+def verify_signature(payload_body: bytes, x_hub_signature: str, SECRET_TOKEN: bytes) -> bool:
+    # make sure config is set
     assert(SECRET_TOKEN != b'')
 
     h = hmac.new(SECRET_TOKEN, payload_body, hashlib.sha1)
@@ -58,12 +67,15 @@ def index():
     print("got request: ")
     print(request)
 
+    # make sure we have all of our access credentials
+    USERNAME, API_KEY, SECRET_TOKEN = get_env_config()
+
     # check signature before everything else
     x_hub_signature = request.headers.get('X-Hub-Signature')
     if x_hub_signature == None:
         print('missing signature, ignoring request')
         return '401 Unauthorized'
-    signature_valid = verify_signature(request.body.getvalue(), x_hub_signature)
+    signature_valid = verify_signature(request.body.getvalue(), x_hub_signature, SECRET_TOKEN)
     if signature_valid == False:
         print('signature mismatch, ignoring request')
         return '401 Unauthorized'
@@ -80,7 +92,7 @@ def index():
                 sender_gh_user_id = payload['sender']['id']
                 print("our new sponsor is: ", sender_gh_user_id)
 
-                add_sponsor(sender_gh_user_id)
+                add_sponsor(sender_gh_user_id, USERNAME, API_KEY)
 
                 return '200 OK'
             except:
@@ -88,17 +100,6 @@ def index():
 
 
 if __name__ == '__main__':
-
-    try:
-        USERNAME = os.environ['USERNAME']
-        API_KEY = bytes(os.environ['API_KEY'], "utf-8")
-        SECRET_TOKEN = bytes(os.environ['SECRET_TOKEN'], "utf-8")
-    except KeyError as key:
-        # todo add hint that you can set this in
-        # https://eu-central-1.console.aws.amazon.com/lambda/home?region=eu-central-1#/functions/sponsor-hook-dev?tab=configuration
-        # or locally if you're just testing there
-        sys.exit("ERROR: environment variable " + str(key) + " not set. Shutting down")
-
     # start server
     run(app, host='localhost', port=4567)
 

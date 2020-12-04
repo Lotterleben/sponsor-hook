@@ -100,5 +100,5 @@ if __name__ == '__main__':
         sys.exit("ERROR: environment variable " + str(key) + " not set. Shutting down")
 
     # start server
-    run(app, host='localhost', port=4567)
+    run(app, host='0.0.0.0', port=4567)
 

@@ -1,7 +1,7 @@
 # TODO
 
 documentation:
-- config.json
+- set env vars (USERNAME, API_KEY, SECRET_TOKEN)
 - hook config
 
 code:

@@ -3,6 +3,7 @@ import hashlib
 import hmac
 import json
 import requests
+import sys
 from bottle import Bottle, route, run, template, request
 
 # Authentication for the user who is adding the sponsor.
@@ -44,6 +45,9 @@ def add_sponsor(invitee_id: int):
 
 
 def verify_signature(payload_body: bytes, x_hub_signature: str) -> bool:
+    # make sure we've successfully retrieved and never lost our config
+    assert(SECRET_TOKEN != b'')
+
     h = hmac.new(SECRET_TOKEN, payload_body, hashlib.sha1)
     signature = 'sha1=' + h.hexdigest()
 
@@ -88,11 +92,14 @@ def index():
 
 
 if __name__ == '__main__':
-    with open('config.json', 'r') as config:
+    try:
+        config = open('config.json', 'r')
         config_json = json.loads(config.read())
         USERNAME = config_json['username']
         API_KEY = config_json['api_key']
         SECRET_TOKEN = bytearray(config_json['secret_token'], 'utf-8')
+    except FileNotFoundError:
+        sys.exit('config.json is missing! See the config.json.example file in this directory for a template.')
 
     # start server
     run(app, host='localhost', port=4567)

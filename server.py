@@ -9,13 +9,12 @@ from bottle import Bottle, route, run, template, request
 
 # TODO add "hi we're live, point your webhooks to '/payload'" at / for nicer deploying
 
-TARGET_EVENT = 'issue_comment' # TODO change to 'sponsorship'
-
+TARGET_EVENT = 'sponsorship'
 ORG_API_URL = 'https://api.github.com/orgs/congenial-guacamole-org/'
+KNURLING_SPONSORS_TEAM_ID = 3991575
 
 app = Bottle()
 
-# TODO make this return the vars instead of having global ones
 def get_env_config():
     try:
         USERNAME = os.environ['USERNAME']
@@ -39,7 +38,8 @@ def add_sponsor(invitee_id: int, USERNAME: str, API_KEY: bytes):
     session.auth = (USERNAME, API_KEY)
 
     invitation = {'invitee_id': invitee_id,
-                  'role': 'direct_member'} # TODO: add team ids
+                  'role': 'direct_member',
+                  'team_ids': [KNURLING_SPONSORS_TEAM_ID]}
 
     result = session.post(invitations_endpoint, json.dumps(invitation))
     if result.status_code == 201:
@@ -88,8 +88,7 @@ def index():
         # only take action when a new sponsorship is *created*
         if payload['action'] == 'created':
             try:
-                # TODO pull info from payload['sponsorship']['sponsor']['id'] instead
-                sender_gh_user_id = payload['sender']['id']
+                sender_gh_user_id = payload['sponsorship']['sponsor']['id']
                 print("our new sponsor is: ", sender_gh_user_id)
 
                 add_sponsor(sender_gh_user_id, USERNAME, API_KEY)

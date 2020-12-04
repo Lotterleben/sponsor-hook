@@ -1,0 +1,13 @@
+{
+    "dev": {
+        "app_function": "server.app",
+        "aws_region": "eu-central-1",
+        "profile_name": "ferrous",
+        "project_name": "sponsor-hook",
+        "runtime": "python3.7",
+        "s3_bucket": "zappa-knurling-gh-sponsor-hook",
+        "manage_roles": false,
+        "role_arn": "arn:aws:iam::914124514389:role/sponsor-hook-dev-ZappaLambdaExecutionRole",
+        "role_name": "sponsor-hook-dev-ZappaLambdaExecutionRole"
+    }
+}

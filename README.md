@@ -39,3 +39,10 @@ Unscheduled sponsor-hook-dev-zappa-keep-warm-handler.keep_warm_callback.
 Scheduled sponsor-hook-dev-zappa-keep-warm-handler.keep_warm_callback with expression rate(4 minutes)!
 Your updated Zappa deployment is live!: https://8s1p6pf5e2.execute-api.eu-central-1.amazonaws.com/dev
 ```
+
+# Webhook setup
+
+- Webhook contenttype must be set to `application/json`
+- `config.json` must contain github credentials (see `config.json.sample`)
+- generate and set `secret_token` in config as described in
+  https://docs.github.com/en/free-pro-team@latest/developers/webhooks-and-events/securing-your-webhooks

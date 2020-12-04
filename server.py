@@ -3,7 +3,10 @@ import hashlib
 import hmac
 import json
 import requests
+import sys
 from bottle import Bottle, route, run, template, request
+
+# TODO add "hi we're live, point your webhooks to '/payload'" at / for nicer deploying
 
 # Authentication for the user who is adding the sponsor.
 USERNAME = ''      # read from config.json
@@ -11,13 +14,6 @@ API_KEY = ''       # read from config.json
 SECRET_TOKEN = b'' # read from config.json
 
 TARGET_EVENT = 'issue_comment' # TODO change to 'sponsorship'
-
-# NOTE:
-# - Webhook contenttype must be set to `application/json`
-# - `config.json` must contain github credentials (see `config.json.sample`)
-# - generate and set `secret_token` in config as described in
-#   https://docs.github.com/en/free-pro-team@latest/developers/webhooks-and-events/securing-your-webhooks
-# - TODO add requirements.txt for dependency installation
 
 ORG_API_URL = 'https://api.github.com/orgs/congenial-guacamole-org/'
 
@@ -44,6 +40,9 @@ def add_sponsor(invitee_id: int):
 
 
 def verify_signature(payload_body: bytes, x_hub_signature: str) -> bool:
+    # make sure we've successfully retrieved and never lost our config
+    assert(SECRET_TOKEN != b'')
+
     h = hmac.new(SECRET_TOKEN, payload_body, hashlib.sha1)
     signature = 'sha1=' + h.hexdigest()
 
@@ -88,11 +87,14 @@ def index():
 
 
 if __name__ == '__main__':
-    with open('config.json', 'r') as config:
+    try:
+        config = open('config.json', 'r')
         config_json = json.loads(config.read())
         USERNAME = config_json['username']
         API_KEY = config_json['api_key']
         SECRET_TOKEN = bytearray(config_json['secret_token'], 'utf-8')
+    except FileNotFoundError:
+        sys.exit('config.json is missing! See the config.json.example file in this directory for a template.')
 
     # start server
     run(app, host='localhost', port=4567)

@@ -10,7 +10,7 @@ from bottle import Bottle, route, run, template, request
 # TODO add "hi we're live, point your webhooks to '/payload'" at / for nicer deploying
 
 TARGET_EVENT = 'sponsorship'
-ORG_API_URL = 'https://api.github.com/orgs/congenial-guacamole-org/'
+ORG_API_URL = 'https://github.com/knurling-rs'
 KNURLING_SPONSORS_TEAM_ID = 3991575
 
 app = Bottle()

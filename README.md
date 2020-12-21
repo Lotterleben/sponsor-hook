@@ -19,7 +19,7 @@ Build the docker image by running `docker build -t knurling-zappa .` in the proj
 
 !NOTE! Windows users will need to provide absolute path values in the folling command, because docker. If you're running the command from WSL2, it will work without modification.
 
-Run `docker run -v ```pwd```/:/home/code -v ~/.aws:/root/.aws -eUSERNAME=changeme -eAPI_KEY=changeme -eSECRET_TOKEN=bar -p127.0.0.1:4567:4567/tcp -it knurling-zappa /bin/bash`. Replace github username, API key and secret_token with suitable values.
+Run `docker run -v ```pwd```/:/home/code -v ~/.aws:/root/.aws -eUSERNAME=changeme -eAPI_KEY=changeme -eSECRET_TOKEN=changeme -p127.0.0.1:4567:4567/tcp -it knurling-zappa /bin/bash`. Replace github username, API key and secret_token with suitable values.
 
 This will mount the current directory in the path `/home/code` as well as the AWS config directory required by zappa and give you a shell inside the container. It will expose port `4567` used by the application server to the docker host.
 

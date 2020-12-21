@@ -96,6 +96,8 @@ def index():
                 return '200 OK'
             except:
                 print("missing sponsor data (unexpected request type?)")
+    else:
+        print("Ignored event: ", request.headers.get('X-GitHub-Event'))
 
 
 if __name__ == '__main__':

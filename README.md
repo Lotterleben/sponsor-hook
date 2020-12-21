@@ -71,6 +71,8 @@ $ pip3 install -r requirements.txt
 ```
 This also installs [Zappa](https://github.com/Miserlou/Zappa) and all the dependencies needed for a Zappa deploy
 
+# deploying
+
 ```console
 $ cd sponsor-hook
 $ zappa update dev

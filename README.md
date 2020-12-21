@@ -27,9 +27,9 @@ You can start the SSO login process outside the container and run `zappa deploy|
 
 ## using virtualenv
 
-## dependencies
-
 Make sure you're operating in a [virtual environment](https://docs.python.org/3/library/venv.html) **with python 3.7**
+
+## dependencies
 
 ```console
 $ pip3 install -r requirements.txt

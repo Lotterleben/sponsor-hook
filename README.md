@@ -9,6 +9,34 @@ code:
 
 # installation
 
+## aws setup
+
+### 1. create profile
+⚠️ make sure you set the *profile name* to `ferrous`
+
+```console
+➜  sponsor-hook git:(feature/dockerfile) ✗ aws configure sso
+SSO start URL [None]: http://ferrous-systems.awsapps.com/start/
+SSO Region [None]: eu-central-1
+Attempting to automatically open the SSO authorization page in your default browser.
+If the browser does not open or you wish to use a different device to authorize this request, open the following URL:
+
+https://device.sso.eu-central-1.amazonaws.com/
+
+Then enter the code:
+
+XXXX-XXXX
+The only AWS account available to you is: XXXXXXXXXXXXX
+Using the account ID XXXXXXXXXXXXX
+The only role available to you is: PowerUserAccess
+Using the role name "PowerUserAccess"
+CLI default client Region [None]: eu-central-1
+CLI default output format [None]:
+CLI profile name [PowerUserAccess-914124514389]: ferrous
+
+To use this profile, specify the profile name using --profile, as shown:
+```
+
 ## using docker
 
 ### building (and updating) the docker image
@@ -27,14 +55,23 @@ You can start the SSO login process outside the container and run `zappa deploy|
 
 ## using virtualenv
 
-Make sure you're operating in a [virtual environment](https://docs.python.org/3/library/venv.html) **with python 3.7**
+Make sure you're operating in a [virtual environment](https://docs.python.org/3/library/venv.html) **with python 3.7**:
+
+```console
+$ python3.7 -m venv env
+$ source env/bin/activate
+```
 
 ## dependencies
 
+Install dependencies:
 ```console
+$ cd sponsor-hook
 $ pip3 install -r requirements.txt
 ```
 This also installs [Zappa](https://github.com/Miserlou/Zappa) and all the dependencies needed for a Zappa deploy
+
+# deploying
 
 ```console
 $ cd sponsor-hook

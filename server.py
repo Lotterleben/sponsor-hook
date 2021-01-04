@@ -10,7 +10,7 @@ from bottle import Bottle, route, run, template, request
 # TODO add "hi we're live, point your webhooks to '/payload'" at / for nicer deploying
 
 TARGET_EVENT = 'sponsorship'
-ORG_API_URL = 'https://github.com/knurling-rs'
+TEAM_API_URL = 'https://api.github.com/orgs/knurling-rs/'
 KNURLING_SPONSORS_TEAM_ID = 3991575
 
 app = Bottle()
@@ -29,10 +29,12 @@ def get_env_config():
         sys.exit("ERROR: environment variable " + str(key) + " not set. Shutting down")
 
 # TODO. also mention username for log readig convenience
+# note that `USERNAME` is the auth user, not the user to be added to the repo!
 def add_sponsor(invitee_id: int, USERNAME: str, API_KEY: bytes):
-    print('adding sponsor with id', id)
+    print('adding sponsor with id:', id)
 
-    invitations_endpoint = ORG_API_URL + 'invitations'
+    # see https://docs.github.com/en/free-pro-team@latest/rest/reference/orgs
+    invitations_endpoint = TEAM_API_URL + 'invitations'
 
     session = requests.Session()
     session.auth = (USERNAME, API_KEY)

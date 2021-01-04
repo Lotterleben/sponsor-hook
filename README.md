@@ -37,6 +37,12 @@ CLI profile name [PowerUserAccess-914124514389]: ferrous
 To use this profile, specify the profile name using --profile, as shown:
 ```
 
+This login will expire within an hour; refresh your authorization by calling
+
+```console
+$ aws sso login --profile ferrous
+```
+
 ## using docker
 
 ### building (and updating) the docker image
